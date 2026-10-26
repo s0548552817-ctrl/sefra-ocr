@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - הקלדן התורני שלך</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .book-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 30px 0;
+    }
+    .bottom-buttons {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+    .btn-main {
+      width: 180px;
+      padding: 16px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
+      background: #2a6fad;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .btn-main:hover { background: #1e629d; }
+    footer { color: #5a3820; margin-bottom: 16px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>ספרא - הקלדן התורני שלך</h1>
+
+  <div class="book-container"></div>
+
+  <div class="bottom-buttons">
+    <a href="/register" class="btn-main">הרשמה</a>
+    <a href="/login" class="btn-main">התחברות</a>
+  </div>
+
+  <footer>כל הזכויות שמורות למשפחת שפירא</footer>
+
+  <a href="/admin" style="position:fixed; top:16px; left:16px; color:#5a3820; font-size:13px; text-decoration:none; opacity:0.7;">⚙ הגדרות מנהל</a>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - כניסת מנהל</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 36px 40px; width: 360px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    h2 { color: #3d2b1f; margin-bottom: 24px; text-align: center; font-size: 1.5em; }
+    .link { text-align: center; margin-top: 14px; }
+    .link a { color: #2a6fad; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>כניסת מנהל מערכת</h2>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="POST" action="/admin">
+      <label>סיסמת מנהל</label>
+      <input type="password" name="admin_password" required placeholder="סיסמה">
+      <button type="submit" class="btn" style="width:100%; margin-top:4px;">כניסה</button>
+    </form>
+    <div class="link"><a href="/">חזרה לדף הראשי</a></div>
+  </div>
+</body>
+</html>

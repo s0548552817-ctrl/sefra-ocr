@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Hebrew:wght@400;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  direction: rtl;
+  min-height: 100vh;
+
+  /* רקע חום עם שירטוט ספר פתוח גדול במרכז */
+  background-color: #d4b896;
+  background-image: url('/static/book-bg.svg');
+  background-repeat: no-repeat;
+  background-position: center 140px;
+  background-size: 60% auto;
+  background-attachment: fixed;
+}
+
+/* כותרות בגופן תורני */
+h1, h2.title {
+  font-family: 'Noto Serif Hebrew', serif;
+  color: #3d2b1f;
+  letter-spacing: 1px;
+}
+
+/* כרטיסים */
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 16px rgba(61, 43, 31, 0.15);
+  margin-bottom: 20px;
+}
+
+/* כפתורים */
+.btn {
+  padding: 12px;
+  background: #2a6fad;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  transition: background 0.2s;
+}
+.btn:hover { background: #1d5a91; }
+.btn:disabled { background: #aaa; cursor: not-allowed; }
+.btn-green { background: #2e8b57; }
+.btn-green:hover { background: #1f6b3e; }
+.btn-gray { background: #666; }
+.btn-gray:hover { background: #444; }
+
+/* שדות קלט */
+input, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c8a87a;
+  border-radius: 6px;
+  font-size: 15px;
+  margin-bottom: 14px;
+  background: #fffdf8;
+}
+
+label {
+  display: block;
+  color: #3d2b1f;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+/* שגיאות והצלחות */
+.error   { color: #c0392b; text-align: center; margin-bottom: 12px; font-size: 14px; }
+.success { color: #27ae60; text-align: center; margin-bottom: 12px; font-size: 14px; }
+
+/* footer */
+footer {
+  color: #5a3820;
+  font-size: 13px;
+  padding: 16px 0;
+  text-align: center;
+}

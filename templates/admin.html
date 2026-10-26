@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - הגדרות מערכת</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+    .title { font-size: 1.8em; margin-bottom: 30px; }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .menu-item {
+      background: white;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(61,43,31,0.12);
+      text-decoration: none;
+      color: #3d2b1f;
+      font-size: 1.15em;
+      font-weight: bold;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .menu-item:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(61,43,31,0.2); }
+    .menu-item span { font-size: 0.85em; font-weight: normal; color: #777; display: block; margin-top: 4px; }
+    .logout { margin-top: 30px; }
+    .logout a { color: #999; font-size: 14px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h2 class="title">ברוכים הבאים להגדרות מערכת</h2>
+
+  <div class="menu">
+    <a href="/admin/users" class="menu-item">
+      עריכת משתמשים
+      <span>צפייה, עריכה ומחיקת משתמשים רשומים</span>
+    </a>
+    <a href="/admin/dictionary" class="menu-item">
+      צפייה במילונים
+      <span>עברי, ארמי, ממוזג — חיפוש, הוספה ומחיקה</span>
+    </a>
+    <a href="/admin/add_text" class="menu-item">
+      הוספת טקסט למילון הארמי
+      <span>העלאת ספר או טקסט להרחבת המילון</span>
+    </a>
+
+    <!-- מיזוג מילונים -->
+    <div class="menu-item" style="cursor:default">
+      מיזוג מילונים
+      <span>בנה מחדש את המילון הממוזג אחרי שינויים</span>
+      {% if merge_message %}<p style="color:#27ae60; font-size:0.8em; margin-top:8px">{{ merge_message }}</p>{% endif %}
+      <form method="POST" action="/admin/merge" style="display:flex; gap:10px; margin-top:12px; align-items:center;">
+        <label style="margin:0; font-weight:normal; font-size:0.85em;">עוצמת ארמית (BOOST):</label>
+        <input type="number" name="boost" value="{{ boost }}" style="width:90px; margin:0; padding:6px;">
+        <button type="submit" class="btn btn-green" style="padding:8px 20px;">מזג</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="logout"><a href="/">חזרה לדף הראשי</a></div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - הוספת טקסט למילון</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+    .title { font-size: 1.6em; margin-bottom: 10px; }
+    .subtitle { color: #5a3820; font-size: 1em; margin-bottom: 24px; }
+    .container { width: 100%; max-width: 560px; }
+    .panel { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(61,43,31,0.12); margin-bottom: 20px; }
+    .panel h3 { color: #3d2b1f; margin-bottom: 14px; font-size: 1.1em; }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      padding: 12px;
+      border: 1px solid #c8a87a;
+      border-radius: 6px;
+      font-size: 15px;
+      font-family: Arial;
+      direction: rtl;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    #drop-zone {
+      border: 2px dashed #8b5e3c;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      color: #5a3820;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: background 0.2s;
+    }
+    #drop-zone.drag-over { background: #f0e0cc; }
+    #drop-zone.has-file  { background: #e8f4e8; border-color: #34a853; color: #333; }
+    .msg { color: #27ae60; text-align: center; margin-bottom: 12px; font-size: 14px; }
+    .back { margin-top: 10px; }
+    .back a { color: #5a3820; text-decoration: none; font-size: 14px; }
+    .note { background: #fff8e8; border: 1px solid #e8d8a8; border-radius: 6px; padding: 10px; font-size: 13px; color: #7a6020; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2 class="title">הוספת טקסט למילון הארמי</h2>
+  <p class="subtitle">הטקסט יפורק למילים ויתווסף למילון עם התדירויות</p>
+
+  <div class="container">
+    {% if message %}<p class="msg">{{ message }}</p>{% endif %}
+
+    <!-- העלאת קובץ Word -->
+    <div class="panel">
+      <h3>העלאת קובץ Word</h3>
+      <form method="POST" action="/admin/add_text" enctype="multipart/form-data">
+        <div id="drop-zone" onclick="document.getElementById('docx-file').click()">
+          <p>גרור קובץ Word לכאן או לחץ לבחירה</p>
+          <p style="font-size:12px; margin-top:6px; color:#888">קובץ .docx בלבד</p>
+        </div>
+        <input type="file" id="docx-file" name="docx_file" accept=".docx" style="display:none">
+        <button type="submit" class="btn" style="width:100%">הוסף למילון</button>
+      </form>
+    </div>
+
+    <!-- הדבקת טקסט -->
+    <div class="panel">
+      <h3>או הדבק טקסט ישירות</h3>
+      <form method="POST" action="/admin/add_text">
+        <textarea name="pasted_text" placeholder="הדבק כאן טקסט בעברית/ארמית..."></textarea>
+        <button type="submit" class="btn btn-green" style="width:100%">הוסף למילון</button>
+      </form>
+    </div>
+
+    <div class="note">אחרי ההוספה — יש להפעיל מחדש את מיזוג המילונים כדי שהשינוי ישפיע על הפיענוח.</div>
+  </div>
+
+  <div class="back"><a href="/admin">חזרה להגדרות</a></div>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('docx-file');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        dropZone.classList.add('has-file');
+        dropZone.querySelector('p').textContent = `נבחר: ${file.name}`;
+      }
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) {
+        dropZone.classList.add('has-file');
+        dropZone.querySelector('p').textContent = `נבחר: ${fileInput.files[0].name}`;
+      }
+    });
+  </script>
+</body>
+</html>

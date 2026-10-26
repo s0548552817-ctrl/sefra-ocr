@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - עריכת משתמשים</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+    .title { font-size: 1.6em; margin-bottom: 24px; }
+    .container { width: 100%; max-width: 760px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(61,43,31,0.12);
+    }
+    th, td { padding: 12px 16px; text-align: right; border-bottom: 1px solid #eee; }
+    th { background: #8b5e3c; color: white; font-size: 14px; }
+    td { font-size: 14px; color: #333; }
+    tr:last-child td { border-bottom: none; }
+    .btn-small {
+      padding: 6px 14px;
+      font-size: 13px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+    }
+    .btn-edit { background: #2a6fad; }
+    .btn-delete { background: #c0392b; }
+    .btn-small:hover { opacity: 0.85; }
+    .back { margin-top: 24px; }
+    .back a { color: #5a3820; text-decoration: none; font-size: 14px; }
+    .empty { text-align: center; color: #888; padding: 30px; }
+    .msg { color: #27ae60; margin-bottom: 16px; font-size: 14px; }
+
+    /* חלון עריכה */
+    .modal-bg {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center; justify-content: center;
+    }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 360px;
+    }
+    .modal h3 { color: #3d2b1f; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <h2 class="title">עריכת משתמשים</h2>
+
+  <div class="container">
+    {% if message %}<p class="msg">{{ message }}</p>{% endif %}
+
+    {% if users %}
+    <table>
+      <tr>
+        <th>שם משתמש</th>
+        <th>תעודת זהות</th>
+        <th>טלפון</th>
+        <th>פעולות</th>
+      </tr>
+      {% for name, data in users.items() %}
+      <tr>
+        <td>{{ name }}</td>
+        <td>{{ data.id }}</td>
+        <td>{{ data.phone }}</td>
+        <td>
+          <button class="btn-small btn-edit"
+                  onclick="openEdit('{{ name }}', '{{ data.id }}', '{{ data.phone }}', '{{ data.password }}')">עריכה</button>
+          <form method="POST" action="/admin/users/delete" style="display:inline"
+                onsubmit="return confirm('למחוק את {{ name }}?')">
+            <input type="hidden" name="username" value="{{ name }}">
+            <button class="btn-small btn-delete" type="submit">מחיקה</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="empty">אין משתמשים רשומים</p>
+    {% endif %}
+  </div>
+
+  <div class="back"><a href="/admin">חזרה להגדרות</a></div>
+
+  <!-- חלון עריכה -->
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal">
+      <h3>עריכת משתמש</h3>
+      <form method="POST" action="/admin/users/edit">
+        <input type="hidden" name="original_name" id="edit-original">
+        <label>שם משתמש</label>
+        <input type="text" name="username" id="edit-name">
+        <label>תעודת זהות</label>
+        <input type="text" name="id_number" id="edit-id">
+        <label>טלפון</label>
+        <input type="text" name="phone" id="edit-phone">
+        <label>סיסמה</label>
+        <input type="text" name="password" id="edit-password">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="submit" class="btn" style="flex:1">שמור</button>
+          <button type="button" class="btn btn-gray" style="flex:1" onclick="closeEdit()">ביטול</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEdit(name, id, phone, password) {
+      document.getElementById('edit-original').value = name;
+      document.getElementById('edit-name').value = name;
+      document.getElementById('edit-id').value = id;
+      document.getElementById('edit-phone').value = phone;
+      document.getElementById('edit-password').value = password;
+      document.getElementById('modal-bg').style.display = 'flex';
+    }
+    function closeEdit() {
+      document.getElementById('modal-bg').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

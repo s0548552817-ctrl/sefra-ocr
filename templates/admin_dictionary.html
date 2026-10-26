@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - מילונים</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+    .title { font-size: 1.6em; margin-bottom: 20px; }
+    .container { width: 100%; max-width: 680px; }
+
+    /* בחירת מילון */
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+    .tab {
+      padding: 10px 24px;
+      background: #e0cdb0;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-weight: bold;
+      color: #5a3820;
+      border: none;
+      font-size: 15px;
+    }
+    .tab.active { background: #8b5e3c; color: white; }
+
+    .panel { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(61,43,31,0.12); }
+
+    .search-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .search-row input { margin-bottom: 0; }
+    .search-row button { white-space: nowrap; }
+
+    .add-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .add-row input { margin-bottom: 0; }
+
+    .word-list { max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
+    .word-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .word-item:hover { background: #faf6ef; }
+    .word-freq { color: #999; font-size: 13px; }
+    .del-word {
+      background: #c0392b; color: white; border: none;
+      border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 12px;
+    }
+    .stats { color: #777; font-size: 13px; margin-bottom: 12px; text-align: center; }
+    .back { margin-top: 24px; }
+    .back a { color: #5a3820; text-decoration: none; font-size: 14px; }
+    .msg { color: #27ae60; text-align: center; margin-bottom: 12px; font-size: 14px; }
+    .note { background: #fff8e8; border: 1px solid #e8d8a8; border-radius: 6px; padding: 10px; font-size: 13px; color: #7a6020; margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <h2 class="title">מילונים</h2>
+
+  <div class="container">
+    {% if message %}<p class="msg">{{ message }}</p>{% endif %}
+
+    <!-- בחירת מילון -->
+    <div class="tabs">
+      <a href="/admin/dictionary?dict=aramaic"><button class="tab {% if current=='aramaic' %}active{% endif %}">ארמי</button></a>
+      <a href="/admin/dictionary?dict=hebrew"><button class="tab {% if current=='hebrew' %}active{% endif %}">עברי</button></a>
+      <a href="/admin/dictionary?dict=merged"><button class="tab {% if current=='merged' %}active{% endif %}">ממוזג</button></a>
+    </div>
+
+    <div class="panel">
+      <p class="stats">{{ total }} מילים במילון ה{{ current_name }}</p>
+
+      <!-- חיפוש -->
+      <form method="GET" action="/admin/dictionary" class="search-row">
+        <input type="hidden" name="dict" value="{{ current }}">
+        <input type="text" name="search" placeholder="חיפוש מילה..." value="{{ search or '' }}">
+        <button type="submit" class="btn">חפש</button>
+      </form>
+
+      <!-- הוספה (רק לארמי) -->
+      {% if current == 'aramaic' %}
+      <form method="POST" action="/admin/dictionary/add" class="add-row">
+        <input type="hidden" name="dict" value="{{ current }}">
+        <input type="text" name="new_word" placeholder="מילה חדשה" required>
+        <input type="number" name="new_freq" placeholder="תדירות" value="10" style="width:100px" required>
+        <button type="submit" class="btn btn-green">הוסף</button>
+      </form>
+      {% endif %}
+
+      <!-- רשימת מילים -->
+      <div class="word-list">
+        {% for word, freq in words %}
+        <div class="word-item">
+          <span>{{ word }}</span>
+          <span>
+            <span class="word-freq">{{ freq }}</span>
+            {% if current == 'aramaic' %}
+            <form method="POST" action="/admin/dictionary/delete" style="display:inline">
+              <input type="hidden" name="dict" value="{{ current }}">
+              <input type="hidden" name="word" value="{{ word }}">
+              <button class="del-word" type="submit">מחק</button>
+            </form>
+            {% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if current != 'aramaic' %}
+      <div class="note">הוספה ומחיקה אפשריות רק במילון הארמי. המילון העברי והממוזג נבנים אוטומטית.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="back"><a href="/admin">חזרה להגדרות</a></div>
+</body>
+</html>

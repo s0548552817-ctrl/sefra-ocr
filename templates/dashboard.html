@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - פיענוח</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #d4b896;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      direction: rtl;
+      padding: 30px 20px;
+    }
+    h2 { color: #3d2b1f; font-size: 1.5em; margin-bottom: 6px; }
+    .subtitle { color: #5a3820; font-size: 1.1em; margin-bottom: 24px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 100%;
+      max-width: 620px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      margin-bottom: 20px;
+    }
+
+    /* אזור גרירה */
+    #drop-zone {
+      border: 3px dashed #8b5e3c;
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      color: #5a3820;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #drop-zone.drag-over { background: #f0e0cc; }
+    #drop-zone.has-file  { background: #e8f4e8; border-color: #34a853; color: #333; }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #2a6fad;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+    .btn:hover { background: #1d5a91; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-green { background: #2e8b57; }
+    .btn-green:hover { background: #1f6b3e; }
+    .btn-gray { background: #666; }
+    .btn-gray:hover { background: #444; }
+
+    /* התקדמות */
+    #progress-area { display: none; }
+    #progress-text { color: #3d2b1f; font-size: 0.95em; margin-top: 10px; }
+
+    /* תוצאה */
+    #result-area { display: none; }
+    #result-text {
+      white-space: pre-wrap;
+      direction: rtl;
+      font-size: 16px;
+      line-height: 1.9;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 80px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .btn-row .btn { margin-top: 0; }
+
+    footer { color: #5a3820; font-size: 13px; margin-top: auto; padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>שלום, {{ username }}!</h2>
+  <p class="subtitle">בוא נתחיל</p>
+
+  <!-- העלאת קובץ -->
+  <div class="card">
+    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <p style="font-size:1.1em">גרור קובץ לכאן או לחץ לבחירה</p>
+      <p style="font-size:13px; margin-top:8px">תומך ב: PDF, PNG, JPG</p>
+    </div>
+    <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" style="display:none">
+
+    <!-- שם המסמך (מופיע אחרי בחירת קובץ) -->
+    <div id="name-row" style="display:none; margin-top:14px;">
+      <label for="doc-name" style="display:block; color:#5a3820; font-size:0.9em; margin-bottom:4px;">שם המסמך:</label>
+      <input type="text" id="doc-name" placeholder="שם המסמך"
+             style="width:100%; padding:10px; border:1px solid #c9a97e; border-radius:6px; font-size:1em; direction:rtl;">
+    </div>
+
+    <button class="btn" id="process-btn" disabled>פענח</button>
+  </div>
+
+  <!-- התקדמות -->
+  <div class="card" id="progress-area">
+    <p id="progress-text">מתחיל עיבוד...</p>
+  </div>
+
+  <!-- תוצאה -->
+  <div class="card" id="result-area">
+    <h3 style="color:#3d2b1f; margin-bottom:12px">טקסט מפוענח:</h3>
+    <div id="result-text"></div>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="viewResult()">צפייה</button>
+      <button class="btn btn-green" id="download-btn" onclick="downloadWord()">הורדה כ-Word</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="resetForm()">העלאת קובץ נוסף</button>
+      <a href="/" class="btn btn-gray" style="text-align:center; text-decoration:none;">חזרה לדף הראשי</a>
+    </div>
+  </div>
+
+  <footer>כל הזכויות שמורות למשפחת שפירא</footer>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const processBtn = document.getElementById('process-btn');
+    let selectedFile = null;
+    let resultText = '';
+    let docName = 'תוצאת_פיענוח';
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); setFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+
+    function setFile(file) {
+      if (!file) return;
+      selectedFile = file;
+      dropZone.classList.add('has-file');
+      dropZone.querySelector('p').textContent = `נבחר: ${file.name}`;
+      processBtn.disabled = false;
+      // ברירת מחדל לשם המסמך = שם הקובץ בלי הסיומת
+      const nameInput = document.getElementById('doc-name');
+      nameInput.value = file.name.replace(/\.[^.]+$/, '');
+      document.getElementById('name-row').style.display = 'block';
+    }
+
+    processBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      processBtn.disabled = true;
+
+      document.getElementById('progress-area').style.display = 'block';
+      document.getElementById('result-area').style.display = 'none';
+      document.getElementById('progress-text').textContent = 'מתחיל עיבוד...';
+
+      // שם המסמך — ברירת מחדל אם ריק
+      docName = (document.getElementById('doc-name').value || 'תוצאת_פיענוח').trim();
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('doc_name', docName);
+
+      // מתחיל polling כל חצי שנייה
+      const pollInterval = setInterval(pollProgress, 500);
+
+      try {
+        const response = await fetch('/process', { method: 'POST', body: formData });
+        const data = await response.json();
+
+        // עוצר polling
+        clearInterval(pollInterval);
+        document.getElementById('progress-area').style.display = 'none';
+
+        if (data.error) {
+          alert('שגיאה: ' + data.error);
+          processBtn.disabled = false;
+        } else {
+          resultText = data.text;
+          document.getElementById('result-text').textContent = resultText;
+          document.getElementById('result-area').style.display = 'block';
+        }
+      } catch (e) {
+        clearInterval(pollInterval);
+        alert('שגיאת חיבור לשרת');
+        processBtn.disabled = false;
+        document.getElementById('progress-area').style.display = 'none';
+      }
+    });
+
+    // עדכון התקדמות דרך polling
+    async function pollProgress() {
+      const resp = await fetch('/progress');
+      const data = await resp.json();
+      if (data.message) {
+        document.getElementById('progress-text').textContent = data.message;
+      }
+    }
+
+    function viewResult() {
+      const win = window.open('', '_blank');
+      win.document.write(`<html dir="rtl"><body style="font-family:Arial;font-size:16px;line-height:2;padding:20px;direction:rtl;white-space:pre-wrap">${resultText}</body></html>`);
+    }
+
+    function downloadWord() {
+      fetch('/download_word', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: resultText})
+      })
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (docName || 'תוצאת_פיענוח') + '.docx';
+        a.click();
+      });
+    }
+
+    function resetForm() {
+      selectedFile = null;
+      resultText = '';
+      docName = 'תוצאת_פיענוח';
+      dropZone.classList.remove('has-file');
+      dropZone.querySelector('p').textContent = 'גרור קובץ לכאן או לחץ לבחירה';
+      processBtn.disabled = true;
+      document.getElementById('result-area').style.display = 'none';
+      document.getElementById('name-row').style.display = 'none';
+      document.getElementById('doc-name').value = '';
+      fileInput.value = '';
+    }
+  </script>
+</body>
+</html>

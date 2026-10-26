@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>ספרא - הרשמה</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 36px 40px; width: 460px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    h2 { color: #3d2b1f; margin-bottom: 24px; text-align: center; font-size: 1.6em; }
+    .username-preview { font-size: 13px; color: #666; margin-top: -10px; margin-bottom: 14px; }
+    #drop-zone {
+      border: 2px dashed #8b5e3c;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      color: #5a3820;
+      cursor: pointer;
+      margin-bottom: 14px;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    #drop-zone.drag-over { background: #f0e0cc; }
+    #drop-zone.has-file  { background: #e8f4e8; border-color: #34a853; color: #333; }
+    .link { text-align: center; margin-top: 14px; color: #555; font-size: 14px; }
+    .link a { color: #2a6fad; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>הרשמה לספרא</h2>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    {% if success %}<p class="success">{{ success }}</p>{% endif %}
+
+    <form method="POST" action="/register" enctype="multipart/form-data">
+      <label>שם פרטי</label>
+      <input type="text" name="first_name" id="first_name" required placeholder="שם פרטי" oninput="updatePreview()">
+
+      <label>שם משפחה</label>
+      <input type="text" name="last_name" id="last_name" required placeholder="שם משפחה" oninput="updatePreview()">
+      <p class="username-preview" id="username-preview"></p>
+
+      <label>תעודת זהות</label>
+      <input type="text" name="id_number" required placeholder="9 ספרות" maxlength="9">
+
+      <label>מספר טלפון</label>
+      <input type="text" name="phone" required placeholder="05X-XXXXXXX">
+
+      <label>סיסמה</label>
+      <input type="password" name="password" required placeholder="בחר סיסמה">
+
+      <label>דף אימון אישי (PDF)</label>
+      <div id="drop-zone" onclick="document.getElementById('training-file').click()">
+        <p>גרור את דף האימון הסרוק לכאן או לחץ לבחירה</p>
+        <p style="font-size:12px; margin-top:6px; color:#888">קובץ PDF בלבד</p>
+      </div>
+      <input type="file" id="training-file" name="training_pdf" accept=".pdf" style="display:none">
+
+      <button type="submit" class="btn">הרשמה</button>
+    </form>
+    <div class="link">כבר רשום? <a href="/login">התחברות</a></div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('training-file');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        // העברת הקובץ לשדה הנסתר
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        dropZone.classList.add('has-file');
+        dropZone.querySelector('p').textContent = `נבחר: ${file.name}`;
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) {
+        dropZone.classList.add('has-file');
+        dropZone.querySelector('p').textContent = `נבחר: ${fileInput.files[0].name}`;
+      }
+    });
+
+    function updatePreview() {
+      const first = document.getElementById('first_name').value.trim();
+      const last  = document.getElementById('last_name').value.trim();
+      const preview = document.getElementById('username-preview');
+      if (first || last) {
+        preview.textContent = `שם המשתמש שלך יהיה: ${first} ${last}`;
+      } else {
+        preview.textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>
